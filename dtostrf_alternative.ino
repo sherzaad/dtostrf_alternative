@@ -5,7 +5,7 @@ unsigned long cnt = 0;
 float f = 3.1415927;
 
 //alternative to dtostrf().Based on the 'print_float' routine with the 'Print' library.
-//With dtostrf(), once the float string is created 'unused' array elements are filled with <space> character
+//With dtostrf(), once the float string is created, 'unused' array elements are filled with <space> character
 //strcat_lf concaternates only the float string to the existing c-string
 //IMPORTANT: make sure c-string array size is sufficient to accomodate your biggest float string along with the other current string contents!
 void strcat_lf(char *str, const double lf, uint8_t digits = 2) {
