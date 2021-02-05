@@ -41,6 +41,7 @@ void strcat_lf(char *str, const double lf, uint8_t digits = 2) {
   unsigned long int_part = (unsigned long)number;
   double remainder = number - (double)int_part;
   
+  //add integer part to string
   sprintf(&str[strlen(str)], "%ld", int_part);
 
   // Print the decimal point, but only if there are digits beyond
@@ -48,7 +49,7 @@ void strcat_lf(char *str, const double lf, uint8_t digits = 2) {
     strcat(str, ".");
   }
 
-  // Extract digits from the remainder one at a time
+  // Extract digits from the remainder one at a time to add to string
   unsigned int len = strlen(str);
   while (digits-- > 0)
   {
