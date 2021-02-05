@@ -27,7 +27,7 @@ void strcat_lf(char *str, const double lf, uint8_t digits = 2) {
   // Handle negative numbers
   if (number < 0.0)
   {
-    strcat(str, "-"); // constant determined empirically
+    strcat(str, "-");
     number = -number;
   }
 
