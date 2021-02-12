@@ -1,14 +1,15 @@
 #include <MemoryFree.h>; //https://github.com/mpflaga/Arduino-MemoryFree
 
-char str[100] = ""; //IMPORTANT: initialise c-string array as empty
+#define MAX_CHARS 100 //maximum number of characters in c-string (including null terminator!)
+char str[MAX_CHARS] = ""; //IMPORTANT: initialise c-string array as empty
 unsigned long cnt = 0;
 float f = 3.1415927;
 
 //alternative to dtostrf().Based on the 'print_float' routine with the 'Print' library.
-//With dtostrf(), once the float string is created, 'unused' array elements are filled with <space> character
+//With dtostrf(), once the float string is created 'unused' array elements are will with <space> character
 //strcat_lf concaternates only the float string to the existing c-string
 //IMPORTANT: make sure c-string array size is sufficient to accomodate your biggest float string along with the other current string contents!
-void strcat_lf(char *str, const double lf, uint8_t digits = 2) {
+void strcat_lf(char *str, unsigned int max_chars, const double lf, uint8_t digits = 2) {
   double number = lf;
 
   if (isnan(number)) {
@@ -40,27 +41,45 @@ void strcat_lf(char *str, const double lf, uint8_t digits = 2) {
   // Extract the integer part of the number and print it
   unsigned long int_part = (unsigned long)number;
   double remainder = number - (double)int_part;
-  
-  //add integer part to string
-  sprintf(&str[strlen(str)], "%ld", int_part);
+  char temp[12];
+  sprintf(temp, "%ld", int_part);
+
+  //check there is enough elements to contain integer part
+  if (strlen(str) + strlen(temp) >= max_chars) {
+    return;
+  }
+
+  strcat(str, temp);
+
+  //check there is enough elements to contain '.' + at least one digit after decimal point
+  if (strlen(str) + 3 >= max_chars) {
+    return;
+  }
 
   // Print the decimal point, but only if there are digits beyond
   if (digits > 0) {
     strcat(str, ".");
   }
 
-  // Extract digits from the remainder one at a time to add to string
+  // Extract digits from the remainder one at a time
   unsigned int len = strlen(str);
   while (digits-- > 0)
   {
     remainder *= 10.0;
     unsigned int toPrint = (unsigned int)(remainder);
     str[len++] = toPrint + 48; //convert number to ASCII character
+
+    //check there is enough elements to continue adding remainder digits
+    if (len >= max_chars) {
+      str[--len] = '\0';
+      return;
+    }
+
     remainder -= toPrint;
   }
 
-  str[len]='\0';
-  
+  str[len] = '\0';
+
 }
 
 void setup() {
@@ -78,10 +97,10 @@ void loop() {
   //write the first part of your c-string
   sprintf(str, "Try: %ld, f: ", cnt++);
   //concaternate 5dp float number to str
-  strcat_lf(str, f, 5);
+  strcat_lf(str, MAX_CHARS, f, 5);
 
   //and if you want to add more to str...
-  sprintf(&str[strlen(str)], ", Free RAM: %d", freeMemory()); //strcat could have neen used instead
+  sprintf(&str[strlen(str)], ", Free RAM: %d", freeMemory()); //strcat could have been used instead
 
   //print to serial monitor
   Serial.println(str);
