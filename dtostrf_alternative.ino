@@ -1,109 +1,59 @@
 #include <MemoryFree.h>; //https://github.com/mpflaga/Arduino-MemoryFree
 
-#define MAX_CHARS 100 //maximum number of characters in c-string (including null terminator!)
-char str[MAX_CHARS] = ""; //IMPORTANT: initialise c-string array as empty
-unsigned long cnt = 0;
-float f = 3.1415927;
-
-//alternative to dtostrf().Based on the 'print_float' routine with the 'Print' library.
-//With dtostrf(), once the float string is created 'unused' array elements are will with <space> character
-//strcat_lf concaternates only the float string to the existing c-string
-//IMPORTANT: make sure c-string array size is sufficient to accomodate your biggest float string along with the other current string contents!
-void strcat_lf(char *str, unsigned int max_chars, const double lf, uint8_t digits = 2) {
-  double number = lf;
-
-  if (isnan(number)) {
-    strcat(str, "NAN");
+void float2string(char *arr, float val, unsigned char precision = 2) {
+  if (isnan(val)) {
+    strcat(arr, "NAN");
     return;
   }
-  else if (isinf(number)) {
-    strcat(str, "INF");
+  else if (isinf(val)) {
+    strcat(arr, "INF");
     return;
   }
-  else if (number > 4294967040.0 || number < -4294967040.0) {
-    strcat(str, "OVF"); // constant determined empirically
+  else if (val > 4294967040.0 || val < -4294967040.0) {
+    strcat(arr, "OVF"); // constant determined empirically
     return;
   }
 
-  // Handle negative numbers
-  if (number < 0.0)
-  {
-    strcat(str, "-");
-    number = -number;
+  unsigned long multiplier = 1;
+  float roundup = 0.5;
+
+  for (int i = 0; i < precision; ++i) {
+    multiplier *= 10;
   }
 
-  // Round correctly so that print(1.999, 2) prints as "2.00"
-  double rounding = 0.5;
-  for (uint8_t i = 0; i < digits; ++i) rounding /= 10.0;
+  roundup /= multiplier;
 
-  number += rounding;
-
-  // Extract the integer part of the number and print it
-  unsigned long int_part = (unsigned long)number;
-  double remainder = number - (double)int_part;
-  char temp[12];
-  sprintf(temp, "%ld", int_part);
-
-  //check there is enough elements to contain integer part
-  if (strlen(str) + strlen(temp) >= max_chars) {
-    return;
-  }
-
-  strcat(str, temp);
-
-  //check there is enough elements to contain '.' + at least one digit after decimal point
-  if (strlen(str) + 3 >= max_chars) {
-    return;
-  }
-
-  // Print the decimal point, but only if there are digits beyond
-  if (digits > 0) {
-    strcat(str, ".");
-  }
-
-  // Extract digits from the remainder one at a time
-  unsigned int len = strlen(str);
-  while (digits-- > 0)
-  {
-    remainder *= 10.0;
-    unsigned int toPrint = (unsigned int)(remainder);
-    str[len++] = toPrint + 48; //convert number to ASCII character
-
-    //check there is enough elements to continue adding remainder digits
-    if (len >= max_chars) {
-      str[--len] = '\0';
-      return;
-    }
-
-    remainder -= toPrint;
-  }
-
-  str[len] = '\0';
-
+  if (val < 0) sprintf(arr, "%d.%d", (int)val, (int)(((int)val - val + roundup)*multiplier));
+  else sprintf(arr, "%d.%d", (int)val, (int)((val - (int)val + roundup)*multiplier));
 }
 
+char str[20]; //maximum number of characters in c-string + 2 (for decimal point and null terminator)
+float f = 3.141592;
+int cnt = 0;
 void setup() {
   Serial.begin(115200);
 
-  Serial.print(F("Free RAM0 = "));
+  Serial.print(F("Free RAM = "));
   Serial.println(freeMemory(), DEC);  // print how much RAM is available.
 }
 
 void loop() {
+  str[0] = '\0'; //clear string
 
+  Serial.print("Try: ");
+  Serial.print(cnt++, DEC);
+
+  //create a 4dp c-string from float number
   //String casting of float number
-  //sprintf(str, "Try: %ld, Free RAM: %d, f: %s", cnt++, freeMemory(), String(f, 5).c_str()); //NOT OK!!! 'String' still slowly eats away SRAM memory
+  //sprintf(str,String(f, 4).c_str()); //NOT OK!!! 'String' still slowly eats away SRAM memory
 
-  //write the first part of your c-string
-  sprintf(str, "Try: %ld, f: ", cnt++);
-  //concaternate 5dp float number to str
-  strcat_lf(str, MAX_CHARS, f, 5);
+  float2string(str, f, 4);
 
-  //and if you want to add more to str...
-  sprintf(&str[strlen(str)], ", Free RAM: %d", freeMemory()); //strcat could have been used instead
+  Serial.print(", f: ");
+  Serial.print(str);
 
-  //print to serial monitor
-  Serial.println(str);
+  Serial.print(", Free RAM: ");
+  Serial.println(freeMemory(), DEC);
 
   //increment the float number
   f += 0.1;
