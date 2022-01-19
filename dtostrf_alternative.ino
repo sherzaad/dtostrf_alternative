@@ -24,9 +24,7 @@ void float2string(char *arr, float val, unsigned char precision = 2) {
   roundup /= multiplier;
 
   if (precision == 0) sprintf(arr, "%ld", (long)(val + roundup));
-  else if (val < 0) sprintf(arr, "%ld.%ld", (long)val, (long)(((long)val - val + roundup)*multiplier));
-  else sprintf(arr, "%ld.%ld", (long)val, (long)((val - (long)val + roundup)*multiplier));
-
+  else sprintf(arr, "%ld.%ld", (long)val, (val < 0) ? (long)(((long)val - val + roundup)*multiplier) : (long)((val - (long)val + roundup)*multiplier));
 }
 
 char str[20]; //maximum number of characters in c-string + 2 (for decimal point and null terminator)
