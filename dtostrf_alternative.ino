@@ -1,6 +1,5 @@
-#include <MemoryFree.h>; //https://github.com/mpflaga/Arduino-MemoryFree
-
-void float2string(char *arr, float val, unsigned char precision = 2) {
+void float2string(char *arr, float val, unsigned char dp = 20) {
+  float i = dp;
   if (isnan(val)) {
     strcat(arr, "NAN");
     return;
@@ -14,27 +13,34 @@ void float2string(char *arr, float val, unsigned char precision = 2) {
     return;
   }
 
-  unsigned long multiplier = 1;
-  float roundup = (val < 0) ? -0.5 : 0.5;
-
-  for (int i = 0; i < precision; ++i) {
-    multiplier *= 10;
+  
+  if (i > 0) {
+    long whole_num = (long)val; //casting float to long integer(whole number part of number)
+    float frac = abs(val - whole_num); //get the fractional part of number
+                                       //using abs() to take care of potential negative float value
+    
+    //turning fractional part of number into an integer value
+    while (i > 0) {
+      frac *= 10;
+      if (dp < 20) i = --dp; //number of decimal places was specfied
+      else i = fmod(frac, 1);
+    }
+    frac += 0.5; //roundup
+    sprintf(arr, "%ld.%ld", whole_num, (long)frac);
   }
-
-  roundup /= multiplier;
-
-  if (precision == 0) sprintf(arr, "%ld", (long)(val + roundup));
-  else sprintf(arr, "%ld.%ld", (long)val, (val < 0) ? (long)(((long)val - val + roundup)*multiplier) : (long)((val - (long)val + roundup)*multiplier));
+  else {
+    //round up to nearest whole number
+    sprintf(arr, "%ld", (long)(val + ((val < 0) ? -0.5 : 0.5)));
+  }
 }
+
 
 char str[20]; //maximum number of characters in c-string + 2 (for decimal point and null terminator)
 float f = 3.141592;
 int cnt = 0;
+
 void setup() {
   Serial.begin(115200);
-
-  Serial.print(F("Free RAM = "));
-  Serial.println(freeMemory(), DEC);  // print how much RAM is available.
 }
 
 void loop() {
@@ -43,17 +49,12 @@ void loop() {
   Serial.print("Try: ");
   Serial.print(cnt++, DEC);
 
-  //create a 4dp c-string from float number
-  //String casting of float number
-  //sprintf(str,String(f, 4).c_str()); //NOT OK!!! 'String' still slowly eats away SRAM memory
+  //sprintf(str,String(f, 4).c_str()); //BEWARE!'String' may slowly eating away SRAM memory
 
   float2string(str, f, 4);
 
   Serial.print(", f: ");
-  Serial.print(str);
-
-  Serial.print(", Free RAM: ");
-  Serial.println(freeMemory(), DEC);
+  Serial.println(str);
 
   //increment the float number
   f += 0.1;
