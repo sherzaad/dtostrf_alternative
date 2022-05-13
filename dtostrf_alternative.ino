@@ -22,7 +22,7 @@ void float2string(char *arr, float val, unsigned char dp = 20) {
     //turning fractional part of number into an integer value
     while (i > 0) {
       frac *= 10;
-      if (dp < 20) i = --dp; //number of decimal places was specfied
+      if (dp < 20) --i; //number of decimal places was specfied
       else i = fmod(frac, 1);
     }
     frac += 0.5; //roundup
