@@ -1,4 +1,4 @@
-void float2string(char *arr, float val, unsigned char dp = 20) {
+void float2string(char *arr, float val, int8_t dp = 20) {
   if (isnan(val)) {
     strcat(arr, "NAN");
     return;
@@ -12,24 +12,20 @@ void float2string(char *arr, float val, unsigned char dp = 20) {
     return;
   }
 
-  float f = abs(val);
-  
   if (dp > 0) {
+    float f = abs(val);
     long whole_num = f; //casting float to long integer(whole number part of number)
     float frac = f - whole_num; //get the fractional part of number
-                                       //using abs() to take care of potential negative float value
-    
+
     //turning fractional part of number into an integer value
     while (dp-- > 0) {
       frac *= 10;
     }
     frac += 0.5; //roundup
-    sprintf(arr, "%c%ld.%ld",(val < 0) ? '-' : '', whole_num, (long)frac);
+    sprintf(arr, "%ld.%ld",(long)val, (long)frac);
   }
   else {
-    long whole_num = (f+0.5); //casting float to long integer(whole number part of number)
-    //round up to nearest whole number
-    sprintf(arr, "%c%ld", (val < 0) ? '-' : '',whole_num);
+    sprintf(arr, "%ld", (long)(val + (val > 0 ? 0.5 : -0.5)));
   }
 }
 
@@ -41,7 +37,6 @@ int cnt = 0;
 void setup() {
   Serial.begin(115200);
 }
-
 void loop() {
   str[0] = '\0'; //clear string
 
