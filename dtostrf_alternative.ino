@@ -1,5 +1,4 @@
 void float2string(char *arr, float val, unsigned char dp = 20) {
-  float i = dp;
   if (isnan(val)) {
     strcat(arr, "NAN");
     return;
@@ -13,24 +12,24 @@ void float2string(char *arr, float val, unsigned char dp = 20) {
     return;
   }
 
+  float f = abs(val);
   
-  if (i > 0) {
-    long whole_num = (long)val; //casting float to long integer(whole number part of number)
-    float frac = abs(val - whole_num); //get the fractional part of number
+  if (dp > 0) {
+    long whole_num = f; //casting float to long integer(whole number part of number)
+    float frac = f - whole_num; //get the fractional part of number
                                        //using abs() to take care of potential negative float value
     
     //turning fractional part of number into an integer value
-    while (i > 0) {
+    while (dp-- > 0) {
       frac *= 10;
-      if (dp < 20) --i; //number of decimal places was specfied
-      else i = fmod(frac, 1);
     }
     frac += 0.5; //roundup
-    sprintf(arr, "%ld.%ld", whole_num, (long)frac);
+    sprintf(arr, "%c%ld.%ld",(val < 0) ? '-' : '', whole_num, (long)frac);
   }
   else {
+    long whole_num = (f+0.5); //casting float to long integer(whole number part of number)
     //round up to nearest whole number
-    sprintf(arr, "%ld", (long)(val + ((val < 0) ? -0.5 : 0.5)));
+    sprintf(arr, "%c%ld", (val < 0) ? '-' : '',whole_num);
   }
 }
 
