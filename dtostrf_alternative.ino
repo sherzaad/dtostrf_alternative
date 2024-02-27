@@ -24,7 +24,7 @@ class float2string {
       uint8_t index = 0;
 
       if (val < 0) {
-        arr = "-";
+        memcpy(&arr[index], "-", f_str_max_len);
         index = 1;
       }
 
