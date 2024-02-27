@@ -1,43 +1,55 @@
 class float2string {
-public:
-  const static uint8_t f_str_max_len = 20;
-  inline static char f_str[f_str_max_len];
+  public:
+    const static uint8_t f_str_max_len = 16;
+    inline static char f_str[f_str_max_len];
 
-  static void make(float val, uint8_t dp = 20) {
-    f2str(f_str, val, (int8_t)dp);
-  }
-
-private:
-  static void f2str(char *arr, float val, int8_t dp) {
-    if (isnan(val)) {
-      memcpy(arr, "NAN", f_str_max_len);
-      return;
-    } else if (isinf(val)) {
-      memcpy(arr, "INF", f_str_max_len);
-      return;
-    } else if (val > 4294967040.0 || val < -4294967040.0) {
-      memcpy(arr, "OVF", f_str_max_len); // constant determined empirically
-      return;
+    static void make(float val, uint8_t dp) {
+      f2str(f_str, val, dp);
     }
 
-    if (dp > 0) {
-      float f = abs(val);
-      long whole_num = f;          //casting float to long integer(whole number part of number)
-      float frac = f - whole_num;  //get the fractional part of number
-
-      //turning fractional part of number into an integer value
-      while (dp-- > 0) {
-        frac *= 10;
+  private:
+    static void f2str(char *arr, float val, uint8_t dp) {
+      if (isnan(val)) {
+        memcpy(arr, "NAN", f_str_max_len);
+        return;
+      } else if (isinf(val)) {
+        memcpy(arr, "INF", f_str_max_len);
+        return;
+      } else if (val > 4294967040.0 || val < -4294967040.0) {
+        memcpy(arr, "OVF", f_str_max_len);  // constant determined empirically
+        return;
       }
-      frac += 0.5;  //roundup
-      sprintf(arr, "%ld.%ld", (long)val, (long)frac);
-    } else {
-      sprintf(arr, "%ld", (long)(val + (val > 0 ? 0.5 : -0.5)));
+
+      float f = abs(val);
+      uint8_t index = 0;
+
+      if (val < 0) {
+        arr = "-";
+        index = 1;
+      }
+
+      if (f < 1) {
+        memcpy(&arr[index], "0.", f_str_max_len);
+        index += 2;
+      }
+
+      for (uint8_t i = 0; i < dp; ++i) {
+        f *= 10;
+      }
+
+      f += 0.5;  //roundup
+
+      sprintf(&arr[index], "%ld", (uint32_t)f);
+
+      if (index < 2) {
+        index = strlen(arr) - dp;
+        memmove(&arr[index + 1], &arr[index], dp);
+        arr[index] = '.';
+      }
     }
-  }
 };
 
-float f = 3.141592;
+float f = 0.141592;
 int cnt = 0;
 
 void setup() {
