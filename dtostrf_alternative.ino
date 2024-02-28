@@ -36,7 +36,7 @@ class float2string {
       for (uint8_t i = 0; i < dp; ++i) {
         f *= 10;
         if (f < 1) {
-          if(!((i+1 == dp) && (f + 0.5 > 1))) arr[index++] = '0';
+          if(!((i+1 == dp) && (f + 0.5 >= 1))) arr[index++] = '0';
         }
       }
 
