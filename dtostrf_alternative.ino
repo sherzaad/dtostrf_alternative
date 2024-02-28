@@ -37,7 +37,7 @@ class float2string {
       memmove(&arr[index + 1], &arr[index], dp + 1);
       arr[index] = '.';
 
-      if (abs(val) < 1) {
+      if (arr[0] == '.') {
         index = strlen(arr) + 1;
         memmove(&arr[1], &arr[0], index);
         arr[0] = '0';
@@ -52,7 +52,7 @@ class float2string {
     }
 };
 
-float f = 0.0145592;
+float f = 3.145592;
 int cnt = 0;
 
 void setup() {
@@ -61,16 +61,15 @@ void setup() {
 void loop() {
   Serial.print("Try: ");
   Serial.print(cnt++, DEC);
+  Serial.print(", f: ");
 
   //sprintf(str,String(f, 4).c_str()); //BEWARE!'String' may slowly eating away SRAM memory
 
   float2string::make(f, 4);
-
-  Serial.print(", f: ");
   Serial.println(float2string::f_str);
 
   //increment the float number
-  f += 0.01;
+  f += 0.1;
 
   //arbitrary delay
   delay(1000);
