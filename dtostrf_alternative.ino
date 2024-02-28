@@ -23,16 +23,6 @@ class float2string {
       float f = abs(val);
       uint8_t index = 0;
 
-      if (val < 0) {
-        memcpy(&arr[index], "-", f_str_max_len);
-        index = 1;
-      }
-
-      if (f < 1) {
-        memcpy(&arr[index], "0.", f_str_max_len);
-        index += 2;
-      }
-
       for (uint8_t i = 0; i < dp; ++i) {
         f *= 10;
         if (f < 1) {
@@ -43,16 +33,26 @@ class float2string {
       f += 0.5;  //roundup
 
       sprintf(&arr[index], "%ld", (uint32_t)f);
+      index = strlen(arr) - dp;
+      memmove(&arr[index + 1], &arr[index], dp + 1);
+      arr[index] = '.';
 
-      if (index < 2) {
-        index = strlen(arr) - dp;
-        memmove(&arr[index + 1], &arr[index], dp);
-        arr[index] = '.';
+      if (abs(val) < 1) {
+        index = strlen(arr) + 1;
+        memmove(&arr[1], &arr[0], index);
+        arr[0] = '0';
       }
+
+      if (val < 0) {
+        index = strlen(arr) + 1;
+        memmove(&arr[1], &arr[0], index);
+        arr[0] = '-';
+      }
+
     }
 };
 
-float f = 0.141592;
+float f = 0.0145592;
 int cnt = 0;
 
 void setup() {
@@ -70,7 +70,7 @@ void loop() {
   Serial.println(float2string::f_str);
 
   //increment the float number
-  f += 0.1;
+  f += 0.01;
 
   //arbitrary delay
   delay(1000);
