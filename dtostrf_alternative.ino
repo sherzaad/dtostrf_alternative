@@ -1,7 +1,7 @@
 class float2string {
   public:
     const static uint8_t f_str_max_len = 16;
-    inline static char f_str[f_str_max_len];
+    inline static char f_str[f_str_max_len] = {0};
 
     static void make(float val, uint8_t dp) {
       f2str(f_str, val, dp);
